@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { BitDisplay } from "./components/BitDisplay";
 import { ipv6ToBits, isValidIPv6 } from "./utils/ipv6-converter";
+import "./style.css";
 
 function IndexPopup() {
 	const [inputValue, setInputValue] = useState("");
@@ -35,20 +37,35 @@ function IndexPopup() {
 		setError("");
 	};
 
-	return (
-		<div
-			style={{
-				display: "flex",
-				flexDirection: "column",
-				padding: 16,
-				minWidth: 400,
-				fontFamily: "Arial, sans-serif",
-			}}
-		>
-			<h2 style={{ margin: "0 0 16px 0", color: "#333" }}>IPv6 → ビット変換</h2>
+	const handleRescan = async () => {
+		try {
+			// 現在のアクティブタブを取得
+			const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+			if (tab.id) {
+				// コンテンツスクリプトに再スキャンメッセージを送信
+				const response = await chrome.tabs.sendMessage(tab.id, { action: "rescan" });
+				if (response?.success) {
+					// 成功フィードバックを表示（一時的に）
+					setError("");
+					const originalResult = result;
+					setResult("ページを再スキャンしました！");
+					setTimeout(() => {
+						setResult(originalResult);
+					}, 2000);
+				}
+			}
+		} catch (error) {
+			console.error("Rescan error:", error);
+			setError("再スキャンに失敗しました");
+		}
+	};
 
-			<div style={{ marginBottom: 12 }}>
-				<label htmlFor="ipv6-input" style={{ display: "block", marginBottom: 4, fontWeight: "bold" }}>
+	return (
+		<div className="popup-container">
+			<h2 className="popup-title">IPv6 → ビット変換</h2>
+
+			<div className="input-group">
+				<label htmlFor="ipv6-input" className="input-label">
 					IPv6アドレス:
 				</label>
 				<input
@@ -57,83 +74,38 @@ function IndexPopup() {
 					value={inputValue}
 					onChange={(e) => setInputValue(e.target.value)}
 					placeholder="例: 2001:db8::1"
-					style={{
-						width: "100%",
-						padding: 8,
-						border: "1px solid #ddd",
-						borderRadius: 4,
-						fontSize: 14,
-					}}
+					className="input-field"
 				/>
 			</div>
 
-			<div style={{ marginBottom: 12 }}>
-				<button
-					type="button"
-					onClick={handleConvert}
-					style={{
-						padding: "8px 16px",
-						backgroundColor: "#007cba",
-						color: "white",
-						border: "none",
-						borderRadius: 4,
-						cursor: "pointer",
-						marginRight: 8,
-					}}
-				>
+			<div className="button-group">
+				<button type="button" onClick={handleConvert} className="btn btn-primary">
 					変換
 				</button>
-				<button
-					type="button"
-					onClick={handleClear}
-					style={{
-						padding: "8px 16px",
-						backgroundColor: "#666",
-						color: "white",
-						border: "none",
-						borderRadius: 4,
-						cursor: "pointer",
-					}}
-				>
+				<button type="button" onClick={handleClear} className="btn btn-secondary">
 					クリア
 				</button>
 			</div>
 
-			{error && (
-				<div
-					style={{
-						padding: 8,
-						backgroundColor: "#ffebee",
-						color: "#c62828",
-						borderRadius: 4,
-						marginBottom: 12,
-						fontSize: 14,
-					}}
-				>
-					{error}
-				</div>
-			)}
+			{error && <div className="error-message">{error}</div>}
 
 			{result && (
-				<div style={{ marginBottom: 12 }}>
-					<div style={{ display: "block", marginBottom: 4, fontWeight: "bold" }}>ビット表記:</div>
-					<div
-						style={{
-							padding: 8,
-							backgroundColor: "#f5f5f5",
-							border: "1px solid #ddd",
-							borderRadius: 4,
-							fontSize: 12,
-							fontFamily: "monospace",
-							wordBreak: "break-all",
-						}}
-					>
-						{result}
+				<div className="result-container">
+					<div className="result-label">ビット表記:</div>
+					<div className="result-box">
+						<BitDisplay bits={result} variant="popup" />
 					</div>
 				</div>
 			)}
 
-			<footer style={{ marginTop: 16, fontSize: 12, color: "#666" }}>IPv6アドレスをビット表記に変換します</footer>
+			<div className="rescan-section">
+				<button type="button" onClick={handleRescan} className="btn btn-rescan">
+					ページを再スキャン
+				</button>
+				<p className="rescan-description">動的に追加されたIPv6アドレスも検出します</p>
+			</div>
+
+			<footer className="footer">IPv6アドレスをビット表記に変換します</footer>
 		</div>
 	);
 }
