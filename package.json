@@ -1,0 +1,46 @@
+{
+	"name": "ipv6-converter",
+	"displayName": "IPv6 Converter",
+	"version": "0.0.1",
+	"description": "Chrome Extension that converts IPv6 hex notation to bit notation on web pages.",
+	"author": "",
+	"scripts": {
+		"dev": "plasmo dev",
+		"build": "plasmo build",
+		"package": "plasmo package",
+		"test": "vitest",
+		"test:ui": "vitest --ui",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"format": "biome format --write ."
+	},
+	"volta": {
+		"node": "24.3.0",
+		"npm": "11.4.2"
+	},
+	"dependencies": {
+		"plasmo": "0.90.5",
+		"react": "19.1.0",
+		"react-dom": "19.1.0"
+	},
+	"manifest": {
+		"host_permissions": [
+			"https://*/*"
+		],
+		"permissions": [
+			"tabs"
+		]
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.1.1",
+		"@testing-library/react": "16.3.0",
+		"@types/chrome": "0.0.332",
+		"@types/node": "24.0.13",
+		"@types/react": "19.1.8",
+		"@types/react-dom": "19.1.6",
+		"@vitest/ui": "3.2.4",
+		"jsdom": "26.1.0",
+		"typescript": "5.8.3",
+		"vitest": "3.2.4"
+	}
+}

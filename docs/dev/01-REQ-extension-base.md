@@ -18,6 +18,9 @@
 
 ### 参考ドキュメント
 
-- コアコンセプト: https://docs.plasmo.com/concepts
-- ファイル階層: https://docs.plasmo.com/framework/file-hierarchy
-- コンテンツスクリプト: https://docs.plasmo.com/framework/content-scripts
+- Overview: https://deepwiki.com/PlasmoHQ/plasmo
+- Project Structure: https://deepwiki.com/PlasmoHQ/plasmo/2.1-project-structure
+- Extension Lifecycle: https://deepwiki.com/PlasmoHQ/plasmo/2.2-extension-lifecycle 
+- Plasmo CLI: https://deepwiki.com/PlasmoHQ/plasmo/3.1-plasmo-cli
+- Project Initialization: https://deepwiki.com/PlasmoHQ/plasmo/3.2-project-initialization
+- Development Mode: https://deepwiki.com/PlasmoHQ/plasmo/4.1-development-mode
