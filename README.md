@@ -6,9 +6,11 @@ IPv6アドレスを16進数表記からビット表記に変換するChrome拡�
 
 ## 機能
 
-- **自動変換**: ウェブページ上のIPv6アドレスを自動検出してビット表記を表示
+- **ホバー表示**: ウェブページ上のIPv6アドレスにマウスオーバーでビット表記をツールチップ表示
 - **手動変換**: ポップアップUIでIPv6アドレスを手動入力して変換
-- **リアルタイム監視**: 動的に追加されるコンテンツも自動で処理
+- **手動再スキャン**: 動的に追加されるコンテンツを手動でスキャン
+- **2行表示**: 128ビットを64ビットずつ2行に分けて視認性を向上
+- **色分け表示**: 0（青色）と1（赤色）で視覚的に区別
 - **多様な形式対応**: 完全形式、短縮形式（::）、ループバックアドレスなど
 
 ## 開発環境のセットアップ
@@ -45,7 +47,10 @@ Chromeブラウザ（Manifest V3）の場合: `build/chrome-mv3-dev`
 
 - `src/popup.tsx`: ポップアップUIの編集
 - `src/contents/plasmo.ts`: コンテンツスクリプトの編集  
-- `src/utils/ipv6-converter.ts`: 変換ロジックの編集
+- `src/utils/ipv6-converter.ts`: IPv6変換ロジック
+- `src/utils/bit-formatting.ts`: ビット表示共通ロジック
+- `src/utils/tooltip-generator.ts`: ツールチップHTML生成
+- `src/components/BitDisplay.tsx`: ビット表示共通コンポーネント
 
 変更は自動的に反映されます。コンテンツスクリプトを変更した場合は、ブラウザで拡張機能をリロードしてください。
 
@@ -84,14 +89,20 @@ npm run build
 
 ```
 src/
+├── components/
+│   └── BitDisplay.tsx     # ビット表示共通コンポーネント
 ├── contents/
 │   └── plasmo.ts          # コンテンツスクリプト
 ├── utils/
-│   ├── ipv6-converter.ts  # IPv6変換ユーティリティ
-│   └── ipv6-converter.test.ts  # テスト
+│   ├── ipv6-converter.ts  # IPv6変換ロジック
+│   ├── ipv6-converter.test.ts  # IPv6変換テスト
+│   ├── bit-formatting.ts # ビット表示共通ロジック
+│   ├── bit-formatting.test.ts # ビット表示テスト
+│   └── tooltip-generator.ts   # ツールチップHTML生成
 ├── test/
 │   └── setup.ts           # テストセットアップ
-└── popup.tsx              # ポップアップUI
+├── popup.tsx              # ポップアップUI
+└── style.css              # 共通スタイル
 ```
 
 ## 対応するIPv6形式
@@ -105,6 +116,16 @@ src/
 
 MIT
 
+## 技術仕様
+
+- **フレームワーク**: Plasmo v0.90.5
+- **UI**: React + TypeScript
+- **スタイル**: CSS（TailwindCSSから移行）
+- **テスト**: Vitest
+- **コード品質**: Biome（リンター + フォーマッター）
+- **表示方式**: ホバーツールチップ + 手動再スキャン
+
 ## 詳細なドキュメント
 
-詳細な実装ドキュメントは [docs/dev/01-DOC-extension-base.md](docs/dev/01-DOC-extension-base.md) を参照してください。
+- [基本実装](docs/dev/01-DOC-extension-base.md): 初期実装の詳細
+- [スタイリング実装](docs/dev/02-DOC-styling.md): UI/UX実装の詳細

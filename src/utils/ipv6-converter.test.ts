@@ -27,6 +27,16 @@ describe("IPv6 Converter", () => {
 			const result = normalizeIPv6("::");
 			expect(result).toBe("0000:0000:0000:0000:0000:0000:0000:0000");
 		});
+
+		it("should handle :: in the middle with trailing segments", () => {
+			const result = normalizeIPv6("2001:0db8:0000:0000:3456::");
+			expect(result).toBe("2001:0db8:0000:0000:3456:0000:0000:0000");
+		});
+
+		it("should handle :: in the middle with leading segments", () => {
+			const result = normalizeIPv6("2001:0db8::3456:0000:0000:0000");
+			expect(result).toBe("2001:0db8:0000:0000:3456:0000:0000:0000");
+		});
 	});
 
 	describe("ipv6ToBits", () => {
@@ -57,6 +67,20 @@ describe("IPv6 Converter", () => {
 				"0010000000000001:0000110110111000:1000010110100011:0000000000000000:0000000000000000:1000101000101110:0000001101110000:0111001100110100",
 			);
 		});
+
+		it("should convert trailing :: notation", () => {
+			const result = ipv6ToBits("2001:0db8:0000:0000:3456::");
+			expect(result).toBe(
+				"0010000000000001:0000110110111000:0000000000000000:0000000000000000:0011010001010110:0000000000000000:0000000000000000:0000000000000000",
+			);
+		});
+
+		it("should convert :: in the middle with trailing zeros", () => {
+			const result = ipv6ToBits("2001:0db8::3456:0000:0000:0000");
+			expect(result).toBe(
+				"0010000000000001:0000110110111000:0000000000000000:0000000000000000:0011010001010110:0000000000000000:0000000000000000:0000000000000000",
+			);
+		});
 	});
 
 	describe("isValidIPv6", () => {
@@ -65,6 +89,8 @@ describe("IPv6 Converter", () => {
 			expect(isValidIPv6("::1")).toBe(true);
 			expect(isValidIPv6("::")).toBe(true);
 			expect(isValidIPv6("2001:db8:85a3:0:0:8a2e:370:7334")).toBe(true);
+			expect(isValidIPv6("2001:0db8:0000:0000:3456::")).toBe(true);
+			expect(isValidIPv6("2001:0db8::3456:0000:0000:0000")).toBe(true);
 		});
 
 		it("should return false for invalid IPv6 addresses", () => {
