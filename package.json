@@ -1,7 +1,7 @@
 {
 	"name": "ipv6-converter",
 	"displayName": "IPv6 Converter",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "Chrome Extension that converts IPv6 hex notation to bit notation on web pages.",
 	"author": "",
 	"scripts": {
