@@ -1,3 +1,4 @@
+import { Storage } from "@plasmohq/storage";
 import type { PlasmoCSConfig } from "plasmo";
 import { IPV6_PATTERN, ipv6ToBits } from "../utils/ipv6-converter";
 import { generateTooltipHTML } from "../utils/tooltip-generator";
@@ -7,15 +8,43 @@ export const config: PlasmoCSConfig = {
 	matches: ["https://*/*", "http://*/*"],
 };
 
+const storage = new Storage();
+
 // ツールチップを作成する関数
 function createTooltip(_ipv6: string, bitsNotation: string): HTMLElement {
 	const tooltip = document.createElement("div");
 	tooltip.className = "ipv6-tooltip";
 	tooltip.style.display = "none";
+	
+	// Copyボタンを追加
+	const copyButton = document.createElement("button");
+	copyButton.textContent = "Copy";
+	copyButton.className = "copy-button";
+	copyButton.title = "Copy binary string";
+	copyButton.style.cssText = "position: absolute; top: 8px; right: 8px; z-index: 11;";
+	
+	// Copyボタンのクリックイベント
+	copyButton.addEventListener("click", async () => {
+		try {
+			const binaryString = bitsNotation.split(":").join("");
+			await navigator.clipboard.writeText(binaryString);
+			copyButton.textContent = "Copied!";
+			setTimeout(() => {
+				copyButton.textContent = "Copy";
+			}, 2000);
+		} catch (error) {
+			console.error("Failed to copy:", error);
+		}
+	});
+	
 	tooltip.innerHTML = `
 		<div>IPv6 Binary:</div>
 		<div class="font-mono">${generateTooltipHTML(bitsNotation)}</div>
 	`;
+	
+	// Copyボタンを追加（絶対配置なので順序は重要でない）
+	tooltip.appendChild(copyButton);
+	
 	return tooltip;
 }
 
@@ -61,19 +90,36 @@ function processTextNode(textNode: Text): void {
 		const tooltip = createTooltip(ipv6Address, bitsNotation);
 		ipv6Span.appendChild(tooltip);
 
-		// ホバーイベントを追加
-		ipv6Span.addEventListener("mouseenter", (_e) => {
+		// ツールチップの表示/非表示用のタイマー
+		let hideTimeout: NodeJS.Timeout;
+
+		// ツールチップを表示する関数
+		const showTooltip = () => {
+			clearTimeout(hideTimeout);
 			const rect = ipv6Span.getBoundingClientRect();
 			tooltip.style.display = "block";
 			tooltip.style.position = "fixed";
 			tooltip.style.left = `${rect.left}px`;
-			tooltip.style.top = `${rect.bottom + 5}px`;
+			tooltip.style.top = `${rect.bottom + 2}px`; // 隙間を2pxに短縮
 			tooltip.style.zIndex = "10000";
-		});
+		};
 
-		ipv6Span.addEventListener("mouseleave", () => {
-			tooltip.style.display = "none";
+		// ツールチップを非表示にする関数（遅延付き）
+		const hideTooltip = () => {
+			hideTimeout = setTimeout(() => {
+				tooltip.style.display = "none";
+			}, 200); // 200ms の遅延
+		};
+
+		// IPv6要素のホバーイベント
+		ipv6Span.addEventListener("mouseenter", showTooltip);
+		ipv6Span.addEventListener("mouseleave", hideTooltip);
+
+		// ツールチップ自体のホバーイベント
+		tooltip.addEventListener("mouseenter", () => {
+			clearTimeout(hideTimeout); // タイマーをクリア
 		});
+		tooltip.addEventListener("mouseleave", hideTooltip);
 
 		parent.insertBefore(ipv6Span, textNode);
 		currentText = currentText.substring(endIndex);
@@ -124,17 +170,22 @@ function clearProcessedMarkers(): void {
 }
 
 // 初期化
-function initializeIPv6Converter(): void {
-	// 既存のコンテンツを処理
-	processNode(document.body);
+async function initializeIPv6Converter(): Promise<void> {
+	// 設定を確認
+	const autoScan = await storage.get("autoScan");
+
+	// 自動スキャンが有効な場合のみ処理
+	if (autoScan === true || autoScan === "true") {
+		processNode(document.body);
+	}
 }
 
 // メッセージリスナー - 手動トリガー用
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
-	if (request.action === "rescan") {
+	if (request.action === "scan") {
 		// 既存の処理をクリア
 		clearProcessedMarkers();
-		// 再スキャン実行
+		// スキャン実行
 		processNode(document.body);
 		sendResponse({ success: true });
 	}

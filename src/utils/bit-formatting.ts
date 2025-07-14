@@ -6,18 +6,18 @@ export interface BitDisplayLine {
 }
 
 /**
- * IPv6ビット文字列を64ビットずつ2行に分割
+ * IPv6ビット文字列を32ビットずつ4行に分割
  */
 export function formatBitsToLines(bits: string): BitDisplayLine[] {
 	const segments = bits.split(":");
 	const binaryString = segments.join("");
 
 	const lines: BitDisplayLine[] = [];
-	for (let i = 0; i < 2; i++) {
-		const start = i * 64;
-		const end = start + 64;
+	for (let i = 0; i < 4; i++) {
+		const start = i * 32;
+		const end = start + 32;
 		lines.push({
-			lineNumber: (i + 1) * 64,
+			lineNumber: (i + 1) * 32,
 			bits: binaryString.slice(start, end),
 		});
 	}
