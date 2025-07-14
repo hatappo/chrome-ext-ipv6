@@ -90,19 +90,26 @@ npm run build
 ```
 src/
 ├── components/
-│   └── BitDisplay.tsx     # ビット表示共通コンポーネント
+│   └── BitDisplay.tsx          # ビット表示共通コンポーネント
 ├── contents/
-│   └── plasmo.ts          # コンテンツスクリプト
+│   └── plasmo.ts               # コンテンツスクリプト
 ├── utils/
-│   ├── ipv6-converter.ts  # IPv6変換ロジック
+│   ├── ipv6-converter.ts       # IPv6変換ロジック
 │   ├── ipv6-converter.test.ts  # IPv6変換テスト
-│   ├── bit-formatting.ts # ビット表示共通ロジック
-│   ├── bit-formatting.test.ts # ビット表示テスト
-│   └── tooltip-generator.ts   # ツールチップHTML生成
+│   ├── bit-formatting.ts       # ビット表示共通ロジック
+│   ├── bit-formatting.test.ts  # ビット表示テスト
+│   └── tooltip-generator.ts    # ツールチップHTML生成
 ├── test/
-│   └── setup.ts           # テストセットアップ
-├── popup.tsx              # ポップアップUI
-└── style.css              # 共通スタイル
+│   └── setup.ts                # テストセットアップ
+├── options.tsx                 # 設定ページUI
+├── popup.tsx                   # ポップアップUI
+└── style.css                   # 共通スタイル
+
+store/                          # Chrome Web Store用アセット
+├── description.txt             # ストア説明文
+├── icon.png                    # ストア用アイコン
+├── screenshot-popup.png        # ポップアップのスクリーンショット
+└── screenshot-tooltip.png      # ツールチップのスクリーンショット
 ```
 
 ## 対応するIPv6形式
