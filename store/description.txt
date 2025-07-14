@@ -1,0 +1,25 @@
+IPv6 Converter instantly transforms IPv6 addresses into visual binary representation, making network analysis and learning more intuitive.
+
+FEATURES:
+• Hover Detection - Simply hover over any IPv6 address on a webpage to see its binary form in a tooltip
+• Visual Binary Display - Converts 128-bit IPv6 addresses into easy-to-read binary format with color coding (blue for 0s, red for 1s)
+• Two-Line Format - Splits the 128-bit binary into two 64-bit lines for better readability
+• Manual Conversion - Use the popup interface to convert any IPv6 address on demand
+• Dynamic Content Support - Manually rescan pages to detect dynamically loaded IPv6 addresses
+• Multiple Format Support - Handles full format, compressed format (::), loopback addresses, and more
+
+BENEFITS:
+• Educational Tool - Perfect for students and professionals learning IPv6 networking
+• Quick Analysis - Instantly visualize the binary structure of IPv6 addresses without manual calculation
+• Network Debugging - Helpful for network engineers to quickly verify address patterns and subnet masks
+• Time Saver - No need to switch between tools or websites for IPv6 binary conversion
+• Seamless Integration - Works on any website without disrupting your browsing experience
+
+WHO SHOULD USE THIS:
+• Network engineers and administrators
+• Computer science students
+• IT professionals working with IPv6
+• Anyone learning about networking protocols
+• Security analysts examining network traffic
+
+The extension is lightweight, privacy-focused (no data collection), and works entirely offline once installed.
