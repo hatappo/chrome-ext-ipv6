@@ -3,16 +3,20 @@ import { addSpacingToBits, formatBitsToLines, getBitColorClass } from "./bit-for
 
 describe("bit-formatting utilities", () => {
 	describe("formatBitsToLines", () => {
-		it("should split 128 bits into 2 lines of 64 bits each", () => {
+		it("should split 128 bits into 4 lines of 32 bits each", () => {
 			const bits =
 				"0010000000000001:0000110110111000:0000000000000000:0000000000000000:0000000000000000:0000000000000000:0000000000000000:0000000000000001";
 			const result = formatBitsToLines(bits);
 
-			expect(result).toHaveLength(2);
-			expect(result[0].lineNumber).toBe(64);
-			expect(result[0].bits).toHaveLength(64);
-			expect(result[1].lineNumber).toBe(128);
-			expect(result[1].bits).toHaveLength(64);
+			expect(result).toHaveLength(4);
+			expect(result[0].lineNumber).toBe(32);
+			expect(result[0].bits).toHaveLength(32);
+			expect(result[1].lineNumber).toBe(64);
+			expect(result[1].bits).toHaveLength(32);
+			expect(result[2].lineNumber).toBe(96);
+			expect(result[2].bits).toHaveLength(32);
+			expect(result[3].lineNumber).toBe(128);
+			expect(result[3].bits).toHaveLength(32);
 		});
 
 		it("should handle typical IPv6 bits format", () => {
@@ -20,8 +24,10 @@ describe("bit-formatting utilities", () => {
 				"0010000000000001:0000110110111000:0000000000000000:0000000000000000:0000000000000000:0000000000000000:0000000000000000:0000000000000001";
 			const result = formatBitsToLines(bits);
 
-			expect(result[0].bits).toBe("0010000000000001000011011011100000000000000000000000000000000000");
-			expect(result[1].bits).toBe("0000000000000000000000000000000000000000000000000000000000000001");
+			expect(result[0].bits).toBe("00100000000000010000110110111000");
+			expect(result[1].bits).toBe("00000000000000000000000000000000");
+			expect(result[2].bits).toBe("00000000000000000000000000000000");
+			expect(result[3].bits).toBe("00000000000000000000000000000001");
 		});
 	});
 
