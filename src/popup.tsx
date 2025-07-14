@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BitDisplay } from "./components/BitDisplay";
-import { ipv6ToBits, isValidIPv6 } from "./utils/ipv6-converter";
+import { detectAddressType, ipAddressToBits, isValidIPAddress } from "./utils/ip-address-common";
 import "./style.css";
 
 function IndexPopup() {
@@ -10,23 +10,23 @@ function IndexPopup() {
 
 	const handleConvert = () => {
 		if (!inputValue.trim()) {
-			setError("Please enter an IPv6 address");
+			setError("Please enter an IP address");
 			setResult("");
 			return;
 		}
 
-		if (!isValidIPv6(inputValue)) {
-			setError("Please enter a valid IPv6 address");
+		if (!isValidIPAddress(inputValue)) {
+			setError("Please enter a valid IP address (IPv4 or IPv6)");
 			setResult("");
 			return;
 		}
 
 		try {
-			const bits = ipv6ToBits(inputValue);
+			const bits = ipAddressToBits(inputValue);
 			setResult(bits);
 			setError("");
 		} catch {
-			setError("Hex to binary conversion error occurred");
+			setError("Conversion error occurred");
 			setResult("");
 		}
 	};
@@ -62,18 +62,18 @@ function IndexPopup() {
 
 	return (
 		<div className="popup-container">
-			<h2 className="popup-title">IPv6 Hex to Binary Converter</h2>
+			<h2 className="popup-title">IP Address to Binary Converter</h2>
 
 			<div className="input-group">
-				<label htmlFor="ipv6-input" className="input-label">
-					IPv6 Address:
+				<label htmlFor="ip-input" className="input-label">
+					IP Address:
 				</label>
 				<input
-					id="ipv6-input"
+					id="ip-input"
 					type="text"
 					value={inputValue}
 					onChange={(e) => setInputValue(e.target.value)}
-					placeholder="e.g. 2001:db8::1"
+					placeholder="e.g. 192.168.1.1 or 2001:db8::1"
 					className="input-field"
 				/>
 			</div>
@@ -102,10 +102,10 @@ function IndexPopup() {
 				<button type="button" onClick={handleScan} className="btn btn-scan">
 					Scan Page
 				</button>
-				<p className="scan-description">Detect IPv6 addresses on this page</p>
+				<p className="scan-description">Detect IP addresses on this page</p>
 			</div>
 
-			<footer className="footer">Convert IPv6 hex format to binary representation</footer>
+			<footer className="footer">Convert IP address to binary representation</footer>
 		</div>
 	);
 }

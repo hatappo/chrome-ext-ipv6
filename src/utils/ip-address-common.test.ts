@@ -1,0 +1,56 @@
+import { describe, expect, it } from "vitest";
+import { detectAddressType, ipAddressToBits, isValidIPAddress } from "./ip-address-common";
+
+describe("detectAddressType", () => {
+	it("IPv4アドレスを正しく判定する", () => {
+		expect(detectAddressType("192.168.1.1")).toBe("ipv4");
+		expect(detectAddressType("10.0.0.1")).toBe("ipv4");
+		expect(detectAddressType("255.255.255.255")).toBe("ipv4");
+	});
+
+	it("IPv6アドレスを正しく判定する", () => {
+		expect(detectAddressType("2001:db8::1")).toBe("ipv6");
+		expect(detectAddressType("::1")).toBe("ipv6");
+		expect(detectAddressType("fe80::1")).toBe("ipv6");
+	});
+
+	it("無効なアドレスを正しく判定する", () => {
+		expect(detectAddressType("not-an-ip")).toBe("invalid");
+		expect(detectAddressType("256.1.1.1")).toBe("invalid");
+		expect(detectAddressType("")).toBe("invalid");
+		expect(detectAddressType("192.168.1")).toBe("invalid");
+	});
+});
+
+describe("isValidIPAddress", () => {
+	it("有効なIPアドレスを正しく判定する", () => {
+		expect(isValidIPAddress("192.168.1.1")).toBe(true);
+		expect(isValidIPAddress("2001:db8::1")).toBe(true);
+		expect(isValidIPAddress("::1")).toBe(true);
+		expect(isValidIPAddress("10.0.0.1")).toBe(true);
+	});
+
+	it("無効なアドレスを正しく判定する", () => {
+		expect(isValidIPAddress("not-an-ip")).toBe(false);
+		expect(isValidIPAddress("256.1.1.1")).toBe(false);
+		expect(isValidIPAddress("")).toBe(false);
+	});
+});
+
+describe("ipAddressToBits", () => {
+	it("IPv4アドレスを正しく変換する", () => {
+		const result = ipAddressToBits("192.168.1.1");
+		expect(result).toBe("1100000010101000:0000000100000001:::::");
+	});
+
+	it("IPv6アドレスを正しく変換する", () => {
+		const result = ipAddressToBits("::1");
+		// IPv6の::1は最後の1ビットのみ1
+		expect(result.endsWith("0000000000000001")).toBe(true);
+	});
+
+	it("無効なアドレスの場合エラーをスローする", () => {
+		expect(() => ipAddressToBits("not-an-ip")).toThrow("Invalid IP address");
+		expect(() => ipAddressToBits("256.1.1.1")).toThrow("Invalid IP address");
+	});
+});

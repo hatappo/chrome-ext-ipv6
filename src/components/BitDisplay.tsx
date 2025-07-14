@@ -1,6 +1,6 @@
 import type React from "react";
-import { useState } from "react";
 import { formatBitsToLines, getBitColorClass } from "../utils/bit-formatting";
+import { useCopyToClipboard } from "../hooks/useCopyToClipboard";
 
 interface BitDisplayProps {
 	bits: string;
@@ -12,24 +12,18 @@ interface BitDisplayProps {
  */
 export function BitDisplay({ bits, variant = "popup" }: BitDisplayProps): React.ReactElement {
 	const lines = formatBitsToLines(bits);
-	const [copySuccess, setCopySuccess] = useState(false);
+	const { copyToClipboard, isCopied } = useCopyToClipboard();
 
 	const handleCopy = async () => {
-		try {
-			const binaryString = bits.split(":").join("");
-			await navigator.clipboard.writeText(binaryString);
-			setCopySuccess(true);
-			setTimeout(() => setCopySuccess(false), 2000);
-		} catch (error) {
-			console.error("Failed to copy:", error);
-		}
+		const binaryString = bits.split(":").join("");
+		await copyToClipboard(binaryString);
 	};
 
 	return (
 		<div className={`bits-display ${variant === "tooltip" ? "tooltip-variant" : ""}`}>
 			<div className="copy-button-container">
 				<button type="button" onClick={handleCopy} className="copy-button" title="Copy binary string">
-					{copySuccess ? "Copied!" : "Copy"}
+					{isCopied ? "Copied!" : "Copy"}
 				</button>
 			</div>
 			{lines.map((line, lineIndex) => (
