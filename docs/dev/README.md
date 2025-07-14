@@ -26,4 +26,4 @@ Others
 - Use the `npm install` command instead of writing dependencies directly in package.json. This is to select the latest version of packages.
 - Use the latest `Vitest` for unit testing.
 - Use the latest `Biome` for linter and formatter.
-- Use ESModules as much as possible instead of CommonJS for the module system.
+- Use `ESModules` as much as possible instead of `CommonJS` for the module system.

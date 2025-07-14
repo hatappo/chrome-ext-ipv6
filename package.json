@@ -19,6 +19,7 @@
 		"npm": "11.4.2"
 	},
 	"dependencies": {
+		"ip-regex": "5.0.0",
 		"plasmo": "0.90.5",
 		"react": "19.1.0",
 		"react-dom": "19.1.0"
