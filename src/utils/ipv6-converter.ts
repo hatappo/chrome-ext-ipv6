@@ -1,7 +1,7 @@
 import ipRegex from "ip-regex";
 
-// IPv6アドレスの正規表現パターン（ip-regexパッケージを使用）
-export const IPV6_PATTERN = ipRegex.v6();
+// IPv6アドレスの正規表現パターン（ip-regexパッケージを使用、完全一致）
+export const IPV6_PATTERN = ipRegex.v6({ exact: true });
 
 /**
  * IPv6アドレスを正規化する関数
@@ -57,36 +57,5 @@ export function isValidIPv6(ipv6: string): boolean {
 	if (!ipv6 || typeof ipv6 !== "string") {
 		return false;
 	}
-
-	try {
-		// 基本的な形式チェック
-		if (!/^[0-9a-fA-F:]+$/.test(ipv6)) {
-			return false;
-		}
-
-		// :: が複数回出現する場合は無効
-		if ((ipv6.match(/::/g) || []).length > 1) {
-			return false;
-		}
-
-		// 正規化を試行
-		const normalized = normalizeIPv6(ipv6);
-
-		// 正規化された形式が期待する形式と一致するかチェック
-		const segments = normalized.split(":");
-		if (segments.length !== 8) {
-			return false;
-		}
-
-		// 各セグメントが4桁の16進数かチェック
-		for (const segment of segments) {
-			if (!/^[0-9a-fA-F]{4}$/.test(segment)) {
-				return false;
-			}
-		}
-
-		return true;
-	} catch {
-		return false;
-	}
+	return IPV6_PATTERN.test(ipv6.trim());
 }

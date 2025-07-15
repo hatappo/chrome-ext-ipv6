@@ -101,15 +101,9 @@ describe("IPv6 Converter", () => {
 	});
 
 	describe("IPV6_PATTERN", () => {
-		it("should match full IPv6 addresses", () => {
-			const address = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
-			const matches = address.match(IPV6_PATTERN);
-			expect(matches).toBeTruthy();
-			expect(matches?.[0]).toBe(address);
-		});
-
-		it("should match compressed IPv6 addresses with ::", () => {
-			const testCases = [
+		it("should validate full IPv6 addresses with exact match", () => {
+			const validAddresses = [
+				"2001:0db8:85a3:0000:0000:8a2e:0370:7334",
 				"2001:db8::1",
 				"::1",
 				"::",
@@ -117,76 +111,10 @@ describe("IPv6 Converter", () => {
 				"::ffff:192.0.2.1",
 				"2001:0db8::3456:0000:0000:0000",
 				"2001:0db8:0000:0000:3456::",
-			];
-
-			testCases.forEach((address) => {
-				const matches = address.match(IPV6_PATTERN);
-				expect(matches).toBeTruthy();
-				expect(matches?.[0]).toBe(address);
-			});
-		});
-
-		it("should match IPv6 addresses without leading zeros", () => {
-			const testCases = [
 				"2001:db8:85a3:0:0:8a2e:370:7334",
 				"2001:db8:85a3::8a2e:370:7334",
 				"fe80::1",
 				"2001:db8:0:0:1:0:0:1",
-			];
-
-			testCases.forEach((address) => {
-				const matches = address.match(IPV6_PATTERN);
-				expect(matches).toBeTruthy();
-				expect(matches?.[0]).toBe(address);
-			});
-		});
-
-		it("should not match patterns that are not valid IPv6", () => {
-			const invalidCases = [
-				"192.168.1.1", // IPv4アドレス
-				"invalid", // 文字列
-				"", // 空文字列
-			];
-
-			invalidCases.forEach((address) => {
-				const matches = address.match(IPV6_PATTERN);
-				expect(matches).toBeFalsy();
-			});
-		});
-
-		it("should extract valid IPv6 from strings with invalid IPv6 format", () => {
-			const testCases = [
-				{ text: "gggg::1", expected: "::1" },
-				{ text: "2001:db8:::1", expected: "2001:db8::" },
-				{ text: "2001:db8:85a3:0:0:8a2e:370:7334:extra", expected: "2001:db8:85a3:0:0:8a2e:370:7334" },
-			];
-
-			testCases.forEach(({ text, expected }) => {
-				const matches = text.match(IPV6_PATTERN);
-				expect(matches).toBeTruthy();
-				expect(matches?.[0]).toBe(expected);
-			});
-		});
-
-		it("should match valid IPv6 in invalid context", () => {
-			// "::1::2"は無効な完全なIPv6アドレスだが、"::1"という有効な部分を含む
-			const text = "::1::2";
-			const matches = text.match(IPV6_PATTERN);
-			expect(matches).toBeTruthy();
-			expect(matches?.[0]).toBe("::1");
-		});
-
-		it("should match IPv6 addresses in text", () => {
-			const text = "Server at 2001:db8::1 is responding. Connect to ::1 for localhost.";
-			const matches = text.match(IPV6_PATTERN);
-			expect(matches).toBeTruthy();
-			expect(matches?.length).toBe(2);
-			expect(matches?.[0]).toBe("2001:db8::1");
-			expect(matches?.[1]).toBe("::1");
-		});
-
-		it("should match various IPv6 compression patterns", () => {
-			const testCases = [
 				"1:2:3:4:5:6:7:8",
 				"1::8",
 				"1:2:3:4:5:6:7::",
@@ -200,11 +128,30 @@ describe("IPv6 Converter", () => {
 				"1:2:3:4:5:6::8",
 			];
 
-			testCases.forEach((address) => {
-				const matches = address.match(IPV6_PATTERN);
-				expect(matches).toBeTruthy();
-				expect(matches?.[0]).toBe(address);
+			validAddresses.forEach((address) => {
+				expect(IPV6_PATTERN.test(address)).toBe(true);
 			});
+		});
+
+		it("should not match invalid IPv6 addresses with exact match", () => {
+			const invalidAddresses = [
+				"192.168.1.1", // IPv4アドレス
+				"invalid", // 文字列
+				"", // 空文字列
+				"gggg::1", // 無効なセグメント
+				"2001:db8:::1", // 不正な::の使用
+				"2001:db8:85a3:0:0:8a2e:370:7334:extra", // 余分なセグメント
+				"::1::2", // 複数の::
+			];
+
+			invalidAddresses.forEach((address) => {
+				expect(IPV6_PATTERN.test(address)).toBe(false);
+			});
+		});
+		
+		it("should not match IPv6 addresses with surrounding text", () => {
+			const text = "Server at 2001:db8::1 is responding";
+			expect(IPV6_PATTERN.test(text)).toBe(false); // exact match のため全体と一致しない
 		});
 	});
 });

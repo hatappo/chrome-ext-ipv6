@@ -1,6 +1,7 @@
 import { Storage } from "@plasmohq/storage";
+import ipRegex from "ip-regex";
 import type { PlasmoCSConfig } from "plasmo";
-import { IPV6_PATTERN, ipv6ToBits } from "../utils/ipv6-converter";
+import { detectAddressType, ipAddressToBits } from "../utils/ip-address-common";
 import { generateTooltipHTML } from "../utils/tooltip-generator";
 import "../style.css";
 
@@ -10,118 +11,144 @@ export const config: PlasmoCSConfig = {
 
 const storage = new Storage();
 
-// ツールチップを作成する関数
-function createTooltip(_ipv6: string, bitsNotation: string): HTMLElement {
-	const tooltip = document.createElement("div");
-	tooltip.className = "ipv6-tooltip";
-	tooltip.style.display = "none";
-	
-	// Copyボタンを追加
-	const copyButton = document.createElement("button");
-	copyButton.textContent = "Copy";
-	copyButton.className = "copy-button";
-	copyButton.title = "Copy binary string";
-	copyButton.style.cssText = "position: absolute; top: 8px; right: 8px; z-index: 11;";
-	
-	// Copyボタンのクリックイベント
-	copyButton.addEventListener("click", async () => {
+// ビット文字列から実際にコピーする文字列を取得
+function getBinaryStringForCopy(bitsNotation: string, addressType: "ipv4" | "ipv6"): string {
+	const segments = bitsNotation.split(":");
+	return addressType === "ipv4"
+		? segments.slice(0, 2).join("") // IPv4: 最初の32ビット
+		: segments.join(""); // IPv6: 全128ビット
+}
+
+// Copyボタンを作成
+function createCopyButton(bitsNotation: string, addressType: "ipv4" | "ipv6"): HTMLButtonElement {
+	const button = document.createElement("button");
+	button.textContent = "Copy";
+	button.className = "copy-button";
+	button.title = "Copy binary string";
+	button.style.cssText = "position: absolute; top: 8px; right: 8px; z-index: 11;";
+
+	button.addEventListener("click", async () => {
 		try {
-			const binaryString = bitsNotation.split(":").join("");
+			const binaryString = getBinaryStringForCopy(bitsNotation, addressType);
 			await navigator.clipboard.writeText(binaryString);
-			copyButton.textContent = "Copied!";
+			button.textContent = "Copied!";
 			setTimeout(() => {
-				copyButton.textContent = "Copy";
+				button.textContent = "Copy";
 			}, 2000);
 		} catch (error) {
 			console.error("Failed to copy:", error);
 		}
 	});
-	
+
+	return button;
+}
+
+// ツールチップを作成する関数
+function createTooltip(bitsNotation: string, addressType: "ipv4" | "ipv6"): HTMLElement {
+	const tooltip = document.createElement("div");
+	tooltip.className = "ipv6-tooltip";
+	tooltip.style.display = "none";
+
+	const label = addressType === "ipv4" ? "IPv4 Binary:" : "IPv6 Binary:";
 	tooltip.innerHTML = `
-		<div>IPv6 Binary:</div>
+		<div>${label}</div>
 		<div class="font-mono">${generateTooltipHTML(bitsNotation)}</div>
 	`;
-	
-	// Copyボタンを追加（絶対配置なので順序は重要でない）
+
+	const copyButton = createCopyButton(bitsNotation, addressType);
 	tooltip.appendChild(copyButton);
-	
+
 	return tooltip;
 }
 
-// テキストノードからIPv6アドレスを検出してホバー機能を追加する関数
+// IPアドレスを含むspan要素を作成
+function createIPSpan(ipAddress: string, addressType: "ipv4" | "ipv6"): HTMLSpanElement {
+	const span = document.createElement("span");
+	span.textContent = ipAddress;
+	span.style.position = "relative";
+	span.style.cursor = "help";
+	span.style.textDecoration = "underline";
+	span.style.textDecorationStyle = "dotted";
+	span.setAttribute("data-ip", ipAddress);
+	span.setAttribute("data-ip-type", addressType);
+	return span;
+}
+
+// ツールチップのホバーイベントを設定
+function setupTooltipHoverEvents(element: HTMLElement, tooltip: HTMLElement): void {
+	let hideTimeout: NodeJS.Timeout;
+
+	const showTooltip = () => {
+		clearTimeout(hideTimeout);
+		const rect = element.getBoundingClientRect();
+		tooltip.style.display = "block";
+		tooltip.style.position = "fixed";
+		tooltip.style.left = `${rect.left}px`;
+		tooltip.style.top = `${rect.bottom + 2}px`;
+		tooltip.style.zIndex = "10000";
+	};
+
+	const hideTooltip = () => {
+		hideTimeout = setTimeout(() => {
+			tooltip.style.display = "none";
+		}, 200);
+	};
+
+	element.addEventListener("mouseenter", showTooltip);
+	element.addEventListener("mouseleave", hideTooltip);
+
+	tooltip.addEventListener("mouseenter", () => {
+		clearTimeout(hideTimeout);
+	});
+	tooltip.addEventListener("mouseleave", hideTooltip);
+}
+
+// テキストノードからIPアドレスを検出してホバー機能を追加する関数
 function processTextNode(textNode: Text): void {
 	const text = textNode.textContent;
 	if (!text) return;
 
-	const matches = Array.from(text.matchAll(new RegExp(IPV6_PATTERN.source, "g")));
+	// IPv4とIPv6の両方のパターンを検出
+	const ipPattern = ipRegex();
+	const matches = Array.from(text.matchAll(new RegExp(ipPattern.source, "g")));
 	if (matches.length === 0) return;
 
 	const parent = textNode.parentElement;
 	if (!parent) return;
 
 	// 既に処理済みかチェック
-	if (parent.hasAttribute("data-ipv6-processed")) return;
+	if (parent.hasAttribute("data-ip-processed")) return;
 
 	let currentText = text;
 	let offset = 0;
 
 	matches.forEach((match) => {
-		const ipv6Address = match[0];
+		const ipAddress = match[0];
 		const startIndex = (match.index ?? 0) + offset;
-		const endIndex = startIndex + ipv6Address.length;
+		const endIndex = startIndex + ipAddress.length;
 
-		// IPv6アドレスの前のテキスト
+		// IPアドレスのタイプを判定
+		const addressType = detectAddressType(ipAddress);
+		if (addressType === "invalid") return;
+
+		// IPアドレスの前のテキスト
 		if (startIndex > 0) {
 			const beforeText = document.createTextNode(currentText.substring(0, startIndex));
 			parent.insertBefore(beforeText, textNode);
 		}
 
-		// IPv6アドレス部分をspanで囲む
-		const ipv6Span = document.createElement("span");
-		ipv6Span.textContent = ipv6Address;
-		ipv6Span.style.position = "relative";
-		ipv6Span.style.cursor = "help";
-		ipv6Span.style.textDecoration = "underline";
-		ipv6Span.style.textDecorationStyle = "dotted";
-		ipv6Span.setAttribute("data-ipv6", ipv6Address);
+		// IPアドレス部分をspanで囲む
+		const ipSpan = createIPSpan(ipAddress, addressType);
 
 		// ツールチップを作成
-		const bitsNotation = ipv6ToBits(ipv6Address);
-		const tooltip = createTooltip(ipv6Address, bitsNotation);
-		ipv6Span.appendChild(tooltip);
+		const bitsNotation = ipAddressToBits(ipAddress);
+		const tooltip = createTooltip(bitsNotation, addressType);
+		ipSpan.appendChild(tooltip);
 
-		// ツールチップの表示/非表示用のタイマー
-		let hideTimeout: NodeJS.Timeout;
+		// ホバーイベントを設定
+		setupTooltipHoverEvents(ipSpan, tooltip);
 
-		// ツールチップを表示する関数
-		const showTooltip = () => {
-			clearTimeout(hideTimeout);
-			const rect = ipv6Span.getBoundingClientRect();
-			tooltip.style.display = "block";
-			tooltip.style.position = "fixed";
-			tooltip.style.left = `${rect.left}px`;
-			tooltip.style.top = `${rect.bottom + 2}px`; // 隙間を2pxに短縮
-			tooltip.style.zIndex = "10000";
-		};
-
-		// ツールチップを非表示にする関数（遅延付き）
-		const hideTooltip = () => {
-			hideTimeout = setTimeout(() => {
-				tooltip.style.display = "none";
-			}, 200); // 200ms の遅延
-		};
-
-		// IPv6要素のホバーイベント
-		ipv6Span.addEventListener("mouseenter", showTooltip);
-		ipv6Span.addEventListener("mouseleave", hideTooltip);
-
-		// ツールチップ自体のホバーイベント
-		tooltip.addEventListener("mouseenter", () => {
-			clearTimeout(hideTimeout); // タイマーをクリア
-		});
-		tooltip.addEventListener("mouseleave", hideTooltip);
-
-		parent.insertBefore(ipv6Span, textNode);
+		parent.insertBefore(ipSpan, textNode);
 		currentText = currentText.substring(endIndex);
 		offset = 0;
 	});
@@ -157,9 +184,9 @@ function processNode(node: Node): void {
 
 // 処理済みの要素をクリアする関数
 function clearProcessedMarkers(): void {
-	const processedElements = document.querySelectorAll("[data-ipv6-processed]");
+	const processedElements = document.querySelectorAll("[data-ip-processed]");
 	processedElements.forEach((element) => {
-		element.removeAttribute("data-ipv6-processed");
+		element.removeAttribute("data-ip-processed");
 	});
 
 	// ツールチップも削除
@@ -170,12 +197,12 @@ function clearProcessedMarkers(): void {
 }
 
 // 初期化
-async function initializeIPv6Converter(): Promise<void> {
+async function initializeIPConverter(): Promise<void> {
 	// 設定を確認
 	const autoScan = await storage.get("autoScan");
 
 	// 自動スキャンが有効な場合のみ処理
-	if (autoScan === true || autoScan === "true") {
+	if (autoScan === "true") {
 		processNode(document.body);
 	}
 }
@@ -194,7 +221,7 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 
 // ページ読み込み後に実行
 if (document.readyState === "loading") {
-	document.addEventListener("DOMContentLoaded", initializeIPv6Converter);
+	document.addEventListener("DOMContentLoaded", initializeIPConverter);
 } else {
-	initializeIPv6Converter();
+	initializeIPConverter();
 }
