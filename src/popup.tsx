@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BitDisplay } from "./components/BitDisplay";
-import { detectAddressType, ipAddressToBits, isValidIPAddress } from "./utils/ip-address-common";
+import { ipAddressToBits, isValidIPAddress } from "./utils/ip-address-common";
 import "./style.css";
 
 function IndexPopup() {

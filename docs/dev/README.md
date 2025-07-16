@@ -4,14 +4,14 @@ The [docs/dev](./docs/dev) folder contains the following types of files. Use the
 
 Files
 
-- `${id}-REQ-${dev-title}.md`: Contains the requirements or requests for the development. This file is mainly used for reading purposes only.
-- `${id}-TASK-${dev-title}.md`: Write out a list of tasks corresponding to the development content here, and check them off as each task is completed.
-- `${id}-DOC-${dev-title}.md`: Documentation corresponding to the development content. Please include design policies, implementation details, important notes, etc.
+- `${id}-REQ-${dev-name}.md`: Contains the requirements or requests for the development. This file is mainly used for reading purposes only.
+- `${id}-TASK-${dev-name}.md`: Write out a list of tasks corresponding to the development content here, and check them off as each task is completed.
+- `${id}-DOC-${dev-name}.md`: Documentation corresponding to the development content. Please include design policies, implementation details, important notes, etc.
 
 Parameters
 
 - `id`: A unique sequential number starting from 01.
-- `dev-title`: A concise phrase representing the development content. Written in snake_case.
+- `dev-name`: A concise phrase representing the development content. Written in snake_case.
 
 Others
 

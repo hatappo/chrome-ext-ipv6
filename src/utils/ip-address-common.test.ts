@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { detectAddressType, ipAddressToBits, isValidIPAddress } from "./ip-address-common";
+import { detectAddressType, detectAndConvertIP, ipAddressToBits, isValidIPAddress } from "./ip-address-common";
 
 describe("detectAddressType", () => {
 	it("IPv4アドレスを正しく判定する", () => {
@@ -52,5 +52,35 @@ describe("ipAddressToBits", () => {
 	it("無効なアドレスの場合エラーをスローする", () => {
 		expect(() => ipAddressToBits("not-an-ip")).toThrow("Invalid IP address");
 		expect(() => ipAddressToBits("256.1.1.1")).toThrow("Invalid IP address");
+	});
+});
+
+describe("detectAndConvertIP", () => {
+	it("有効なIPv4アドレスを正しく変換する", () => {
+		const result = detectAndConvertIP("192.168.1.1");
+		expect(result).not.toBeNull();
+		expect(result?.address).toBe("192.168.1.1");
+		expect(result?.type).toBe("ipv4");
+		expect(result?.binary).toBe("1100000010101000:0000000100000001:::::");
+	});
+
+	it("有効なIPv6アドレスを正しく変換する", () => {
+		const result = detectAndConvertIP("2001:db8::1");
+		expect(result).not.toBeNull();
+		expect(result?.address).toBe("2001:db8::1");
+		expect(result?.type).toBe("ipv6");
+		expect(result?.binary).toContain(":");
+	});
+
+	it("無効なアドレスの場合nullを返す", () => {
+		expect(detectAndConvertIP("not-an-ip")).toBeNull();
+		expect(detectAndConvertIP("256.1.1.1")).toBeNull();
+		expect(detectAndConvertIP("")).toBeNull();
+	});
+
+	it("前後の空白を取り除いて処理する", () => {
+		const result = detectAndConvertIP("  192.168.1.1  ");
+		expect(result).not.toBeNull();
+		expect(result?.address).toBe("192.168.1.1");
 	});
 });

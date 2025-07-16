@@ -3,6 +3,12 @@ import { ipv6ToBits, isValidIPv6 } from "./ipv6-converter";
 
 export type AddressType = "ipv4" | "ipv6" | "invalid";
 
+export interface IPInfo {
+	address: string;
+	type: AddressType;
+	binary: string;
+}
+
 /**
  * IPアドレスのタイプを判定
  * @param address - 判定するアドレス文字列
@@ -59,5 +65,29 @@ export function ipAddressToBits(address: string): string {
 
 		default:
 			throw new Error("Invalid IP address");
+	}
+}
+
+/**
+ * IPアドレスを検出して変換情報を返す
+ * @param address - IPアドレス文字列
+ * @returns IPInfo オブジェクト、無効な場合はnull
+ */
+export function detectAndConvertIP(address: string): IPInfo | null {
+	const type = detectAddressType(address);
+
+	if (type === "invalid") {
+		return null;
+	}
+
+	try {
+		const binary = ipAddressToBits(address);
+		return {
+			address: address.trim(),
+			type,
+			binary,
+		};
+	} catch (_error) {
+		return null;
 	}
 }
