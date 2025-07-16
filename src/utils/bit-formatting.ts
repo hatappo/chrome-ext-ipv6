@@ -11,11 +11,11 @@ export interface BitDisplayLine {
  */
 export function formatBitsToLines(bits: string): BitDisplayLine[] {
 	const segments = bits.split(":");
-	
+
 	const lines: BitDisplayLine[] = [];
-	
+
 	// IPv4の場合（3番目以降のセグメントが空）
-	if (segments.length > 2 && segments.slice(2).every(seg => seg === "")) {
+	if (segments.length > 2 && segments.slice(2).every((seg) => seg === "")) {
 		// 最初の2セグメント（32ビット）のみ結合
 		const ipv4Bits = segments.slice(0, 2).join("");
 		lines.push({

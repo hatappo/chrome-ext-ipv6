@@ -1,7 +1,8 @@
 import { Storage } from "@plasmohq/storage";
 import ipRegex from "ip-regex";
 import type { PlasmoCSConfig } from "plasmo";
-import { detectAddressType, ipAddressToBits } from "../utils/ip-address-common";
+import type { IPInfo } from "../utils/ip-address-common";
+import { detectAddressType, detectAndConvertIP } from "../utils/ip-address-common";
 import { generateTooltipHTML } from "../utils/tooltip-generator";
 import "../style.css";
 
@@ -15,7 +16,9 @@ const storage = new Storage();
 function getBinaryStringForCopy(bitsNotation: string, addressType: "ipv4" | "ipv6"): string {
 	const segments = bitsNotation.split(":");
 	return addressType === "ipv4"
-		? segments.slice(0, 2).join("") // IPv4: 最初の32ビット
+		? segments
+				.slice(0, 2)
+				.join("") // IPv4: 最初の32ビット
 		: segments.join(""); // IPv6: 全128ビット
 }
 
@@ -44,18 +47,18 @@ function createCopyButton(bitsNotation: string, addressType: "ipv4" | "ipv6"): H
 }
 
 // ツールチップを作成する関数
-function createTooltip(bitsNotation: string, addressType: "ipv4" | "ipv6"): HTMLElement {
+function createTooltip(ipInfo: IPInfo): HTMLElement {
 	const tooltip = document.createElement("div");
 	tooltip.className = "ipv6-tooltip";
 	tooltip.style.display = "none";
 
-	const label = addressType === "ipv4" ? "IPv4 Binary:" : "IPv6 Binary:";
+	const label = ipInfo.type === "ipv4" ? "IPv4 Binary:" : "IPv6 Binary:";
 	tooltip.innerHTML = `
 		<div>${label}</div>
-		<div class="font-mono">${generateTooltipHTML(bitsNotation)}</div>
+		<div class="font-mono">${generateTooltipHTML(ipInfo.binary)}</div>
 	`;
 
-	const copyButton = createCopyButton(bitsNotation, addressType);
+	const copyButton = createCopyButton(ipInfo.binary, ipInfo.type as "ipv4" | "ipv6");
 	tooltip.appendChild(copyButton);
 
 	return tooltip;
@@ -141,8 +144,10 @@ function processTextNode(textNode: Text): void {
 		const ipSpan = createIPSpan(ipAddress, addressType);
 
 		// ツールチップを作成
-		const bitsNotation = ipAddressToBits(ipAddress);
-		const tooltip = createTooltip(bitsNotation, addressType);
+		const ipInfo = detectAndConvertIP(ipAddress);
+		if (!ipInfo) return; // 変換に失敗した場合はスキップ
+
+		const tooltip = createTooltip(ipInfo);
 		ipSpan.appendChild(tooltip);
 
 		// ホバーイベントを設定
@@ -207,6 +212,53 @@ async function initializeIPConverter(): Promise<void> {
 	}
 }
 
+// 選択範囲の位置にツールチップを表示する関数
+function showTooltipAtSelection(ipInfo: IPInfo): void {
+	const selection = window.getSelection();
+	if (!selection || selection.rangeCount === 0) return;
+
+	const range = selection.getRangeAt(0);
+	const rect = range.getBoundingClientRect();
+
+	// ツールチップを作成
+	const tooltip = createTooltip(ipInfo);
+	tooltip.style.display = "block";
+	tooltip.style.position = "fixed";
+	tooltip.style.left = `${rect.left}px`;
+	tooltip.style.top = `${rect.bottom + 2}px`;
+	tooltip.style.zIndex = "10001";
+
+	// 既存のコンテキストメニュー由来のツールチップを削除
+	const existingTooltip = document.querySelector(".ipv6-tooltip-context");
+	if (existingTooltip) {
+		existingTooltip.remove();
+	}
+
+	// コンテキストメニュー由来であることを示すクラスを追加
+	tooltip.classList.add("ipv6-tooltip-context");
+	document.body.appendChild(tooltip);
+
+	// 10秒後に自動削除
+	const autoRemoveTimeout = setTimeout(() => {
+		tooltip.remove();
+	}, 10000);
+
+	// クリックで削除
+	const handleClick = (e: MouseEvent) => {
+		// ツールチップ内のクリックは無視
+		if (tooltip.contains(e.target as Node)) return;
+
+		clearTimeout(autoRemoveTimeout);
+		tooltip.remove();
+		document.removeEventListener("click", handleClick);
+	};
+
+	// 少し遅延させてイベントを登録（右クリックメニューのクリックを無視するため）
+	setTimeout(() => {
+		document.addEventListener("click", handleClick);
+	}, 100);
+}
+
 // メッセージリスナー - 手動トリガー用
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 	if (request.action === "scan") {
@@ -215,6 +267,27 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 		// スキャン実行
 		processNode(document.body);
 		sendResponse({ success: true });
+	} else if (request.action === "convertSelection") {
+		// 選択されたテキストからIPアドレスを検出
+		const text = request.text;
+		const ipPattern = ipRegex();
+		const matches = text.match(ipPattern);
+
+		if (matches && matches.length > 0) {
+			// 最初に見つかったIPアドレスを変換
+			const ipAddress = matches[0];
+			const ipInfo = detectAndConvertIP(ipAddress);
+
+			if (ipInfo) {
+				// ツールチップを表示
+				showTooltipAtSelection(ipInfo);
+				sendResponse({ success: true });
+			} else {
+				sendResponse({ success: false, error: "Invalid IP address" });
+			}
+		} else {
+			sendResponse({ success: false, error: "No IP address found" });
+		}
 	}
 	return true;
 });

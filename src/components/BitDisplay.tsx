@@ -1,6 +1,6 @@
 import type React from "react";
-import { formatBitsToLines, getBitColorClass } from "../utils/bit-formatting";
 import { useCopyToClipboard } from "../hooks/useCopyToClipboard";
+import { formatBitsToLines, getBitColorClass } from "../utils/bit-formatting";
 
 interface BitDisplayProps {
 	bits: string;

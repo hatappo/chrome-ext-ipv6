@@ -1,8 +1,8 @@
 {
-	"name": "ipv6-converter",
-	"displayName": "IPv6 Converter",
-	"version": "0.1.0",
-	"description": "Chrome Extension that converts IPv6 hex notation to bit notation on web pages.",
+	"name": "ip-converter",
+	"displayName": "IP Converter",
+	"version": "0.2.0",
+	"description": "Chrome Extension that converts IPv4/IPv6 addresses to binary notation on web pages.",
 	"author": "",
 	"scripts": {
 		"dev": "plasmo dev",
@@ -30,7 +30,8 @@
 			"https://*/*"
 		],
 		"permissions": [
-			"tabs"
+			"tabs",
+			"contextMenus"
 		]
 	},
 	"devDependencies": {

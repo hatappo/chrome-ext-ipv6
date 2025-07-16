@@ -148,7 +148,7 @@ describe("IPv6 Converter", () => {
 				expect(IPV6_PATTERN.test(address)).toBe(false);
 			});
 		});
-		
+
 		it("should not match IPv6 addresses with surrounding text", () => {
 			const text = "Server at 2001:db8::1 is responding";
 			expect(IPV6_PATTERN.test(text)).toBe(false); // exact match のため全体と一致しない

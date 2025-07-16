@@ -8,18 +8,18 @@ describe("formatBitsToLines - IPv4", () => {
 		const lines = formatBitsToLines(ipv4Bits);
 
 		expect(lines).toHaveLength(4);
-		
+
 		// 1行目：32ビット
 		expect(lines[0].lineNumber).toBe(32);
 		expect(lines[0].bits).toBe("1100000010101000000000010000000100001010000000000000000000000001");
-		
+
 		// 2-4行目：空
 		expect(lines[1].lineNumber).toBe(64);
 		expect(lines[1].bits).toBe("");
-		
+
 		expect(lines[2].lineNumber).toBe(96);
 		expect(lines[2].bits).toBe("");
-		
+
 		expect(lines[3].lineNumber).toBe(128);
 		expect(lines[3].bits).toBe("");
 	});
