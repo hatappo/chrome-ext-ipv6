@@ -1,35 +1,36 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import "./style.css";
 import { BitDisplay } from "./components/BitDisplay";
 import { ipAddressToBits, isValidIPAddress } from "./utils/ip-address-common";
-import "./style.css";
 
 function IndexPopup() {
 	const [inputValue, setInputValue] = useState("");
 	const [result, setResult] = useState("");
 	const [error, setError] = useState("");
+	const [scanMessage, setScanMessage] = useState("");
 
-	const handleConvert = () => {
+	// Auto-convert when input changes
+	useEffect(() => {
 		if (!inputValue.trim()) {
-			setError("Please enter an IP address");
 			setResult("");
-			return;
-		}
-
-		if (!isValidIPAddress(inputValue)) {
-			setError("Please enter a valid IP address (IPv4 or IPv6)");
-			setResult("");
-			return;
-		}
-
-		try {
-			const bits = ipAddressToBits(inputValue);
-			setResult(bits);
 			setError("");
-		} catch {
-			setError("Conversion error occurred");
-			setResult("");
+			return;
 		}
-	};
+
+		if (isValidIPAddress(inputValue)) {
+			try {
+				const bits = ipAddressToBits(inputValue);
+				setResult(bits);
+				setError("");
+			} catch {
+				setError("Conversion error occurred");
+				setResult("");
+			}
+		} else {
+			setResult("");
+			setError("Please enter a valid IP address (IPv4 or IPv6)");
+		}
+	}, [inputValue]);
 
 	const handleClear = () => {
 		setInputValue("");
@@ -45,18 +46,19 @@ function IndexPopup() {
 				// コンテンツスクリプトにスキャンメッセージを送信
 				const response = await chrome.tabs.sendMessage(tab.id, { action: "scan" });
 				if (response?.success) {
-					// Show success feedback temporarily
-					setError("");
-					const originalResult = result;
-					setResult("Page scanned successfully!");
+					// Show success feedback in scan message area
+					setScanMessage("Page scanned successfully!");
 					setTimeout(() => {
-						setResult(originalResult);
-					}, 2000);
+						setScanMessage("");
+					}, 3000);
 				}
 			}
 		} catch (error) {
 			console.error("Scan error:", error);
-			setError("Failed to scan page");
+			setScanMessage("Failed to scan page");
+			setTimeout(() => {
+				setScanMessage("");
+			}, 3000);
 		}
 	};
 
@@ -78,31 +80,25 @@ function IndexPopup() {
 				/>
 			</div>
 
-			<div className="button-group">
-				<button type="button" onClick={handleConvert} className="btn btn-primary">
-					Convert
-				</button>
-				<button type="button" onClick={handleClear} className="btn btn-secondary">
-					Clear
-				</button>
-			</div>
+			<button type="button" onClick={handleClear} className="btn btn-secondary btn-clear">
+				Clear
+			</button>
 
 			{error && <div className="error-message">{error}</div>}
 
-			{result && (
-				<div className="result-container">
-					<div className="result-label">Binary Representation:</div>
-					<div className="result-box">
-						<BitDisplay bits={result} variant="popup" />
-					</div>
+			<div className="result-container">
+				<div className="result-label">Binary Representation:</div>
+				<div className="result-box">
+					{result && <BitDisplay bits={result} variant="popup" />}
 				</div>
-			)}
+			</div>
 
 			<div className="scan-section">
 				<button type="button" onClick={handleScan} className="btn btn-scan">
 					Scan Page
 				</button>
 				<p className="scan-description">Detect IP addresses on this page</p>
+				{scanMessage && <div className="scan-message">{scanMessage}</div>}
 			</div>
 
 			<footer className="footer">Convert IP address to binary representation</footer>
