@@ -1,8 +1,8 @@
 {
 	"name": "ip-converter",
-	"displayName": "IP Converter",
+	"displayName": "Binary Network Visualizer",
 	"version": "0.2.0",
-	"description": "Chrome Extension that converts IPv4/IPv6 addresses to binary notation on web pages.",
+	"description": "Educational tool for visualizing network addresses as color-coded binary patterns",
 	"author": "",
 	"scripts": {
 		"dev": "plasmo dev",

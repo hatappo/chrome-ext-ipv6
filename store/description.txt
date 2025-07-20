@@ -1,11 +1,13 @@
-Converts IP addresses to binary notation with visual formatting.
+Visualize network addresses as color-coded binary patterns for educational and debugging purposes.
 
-Features:
-• Hover over IP addresses to see binary representation
-• Right-click to convert selected text
-• Supports both IPv4 and IPv6
-• Color-coded display (blue: 0, red: 1)
-• Copy binary to clipboard
-• Manual conversion via popup
+This tool helps developers, network engineers, and students understand the binary structure of network addresses by displaying them in an intuitive 4-line format with visual color coding.
 
-The extension works offline and does not collect any data.
+Key features:
+• Interactive hover tooltips show binary representation on any webpage
+• Context menu integration for quick analysis of selected text
+• Manual input tool for testing specific addresses
+• Educational color scheme: blue bits (0) and red bits (1)
+• Full support for modern networking: IPv6 (128-bit) and IPv4 (32-bit)
+• Privacy-focused: runs entirely offline without external connections
+
+Perfect for network debugging, CIDR calculations, subnet analysis, and computer science education.
