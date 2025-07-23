@@ -1,7 +1,7 @@
 {
 	"name": "ip-converter",
 	"displayName": "Binary Network Visualizer",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Educational tool for visualizing network addresses as color-coded binary patterns",
 	"author": "",
 	"scripts": {
@@ -30,7 +30,6 @@
 			"https://*/*"
 		],
 		"permissions": [
-			"tabs",
 			"contextMenus"
 		]
 	},
