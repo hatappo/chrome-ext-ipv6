@@ -1,12 +1,25 @@
 import { addSpacingToBits, formatBitsToLines, getBitColorClass } from "./bit-formatting";
+import type { IPv6Classification } from "./ipv6-classifier";
 
 /**
  * ツールチップ用のHTMLを生成
  */
-export function generateTooltipHTML(bits: string): string {
+export function generateTooltipHTML(bits: string, classification?: IPv6Classification): string {
 	const lines = formatBitsToLines(bits);
 
-	return lines
+	let html = "";
+
+	// 分類情報を追加
+	if (classification) {
+		html += `<div class="tooltip-classification">`;
+		html += `<div class="classification-type">${classification.type}</div>`;
+		if (classification.description) {
+			html += `<div class="classification-description">${classification.description}</div>`;
+		}
+		html += `</div>`;
+	}
+
+	html += lines
 		.map((line) => {
 			const spacedBits = addSpacingToBits(line.bits);
 			const coloredBits = spacedBits
@@ -21,4 +34,6 @@ export function generateTooltipHTML(bits: string): string {
 			return `<div class="tooltip-line"><span class="tooltip-line-number">${line.lineNumber}:</span><span class="tooltip-bits">${coloredBits}</span></div>`;
 		})
 		.join("");
+
+	return html;
 }

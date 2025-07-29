@@ -1,16 +1,18 @@
 import type React from "react";
 import { useCopyToClipboard } from "../hooks/useCopyToClipboard";
 import { formatBitsToLines, getBitColorClass } from "../utils/bit-formatting";
+import type { IPv6Classification } from "../utils/ipv6-classifier";
 
 interface BitDisplayProps {
 	bits: string;
 	variant?: "popup" | "tooltip";
+	classification?: IPv6Classification;
 }
 
 /**
  * IPv6ビット表記を4行で表示する共通コンポーネント
  */
-export function BitDisplay({ bits, variant = "popup" }: BitDisplayProps): React.ReactElement {
+export function BitDisplay({ bits, variant = "popup", classification }: BitDisplayProps): React.ReactElement {
 	const lines = formatBitsToLines(bits);
 	const { copyToClipboard, isCopied } = useCopyToClipboard();
 
@@ -21,7 +23,17 @@ export function BitDisplay({ bits, variant = "popup" }: BitDisplayProps): React.
 
 	return (
 		<div className={`bits-display ${variant === "tooltip" ? "tooltip-variant" : ""}`}>
-			<div className="copy-button-container">
+			<div className="classification-header">
+				{classification ? (
+					<div className="classification-info">
+						<div className="classification-type">{classification.type}</div>
+						{classification.description && (
+							<div className="classification-description">{classification.description}</div>
+						)}
+					</div>
+				) : (
+					<div className="classification-info-empty" />
+				)}
 				<button type="button" onClick={handleCopy} className="copy-button" title="Copy binary string">
 					{isCopied ? "Copied!" : "Copy"}
 				</button>
