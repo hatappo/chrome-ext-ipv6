@@ -1,33 +1,33 @@
 import { useEffect, useState } from "react";
 import "./style.css";
 import { BitDisplay } from "./components/BitDisplay";
-import { ipAddressToBits, isValidIPAddress } from "./utils/ip-address-common";
+import { detectAndConvertIP } from "./utils/ip-address-common";
+import type { IPv6Classification } from "./utils/ipv6-classifier";
 
 function IndexPopup() {
 	const [inputValue, setInputValue] = useState("");
 	const [result, setResult] = useState("");
 	const [error, setError] = useState("");
 	const [scanMessage, setScanMessage] = useState("");
+	const [classification, setClassification] = useState<IPv6Classification | undefined>();
 
 	// Auto-convert when input changes
 	useEffect(() => {
 		if (!inputValue.trim()) {
 			setResult("");
 			setError("");
+			setClassification(undefined);
 			return;
 		}
 
-		if (isValidIPAddress(inputValue)) {
-			try {
-				const bits = ipAddressToBits(inputValue);
-				setResult(bits);
-				setError("");
-			} catch {
-				setError("Conversion error occurred");
-				setResult("");
-			}
+		const ipInfo = detectAndConvertIP(inputValue);
+		if (ipInfo) {
+			setResult(ipInfo.binary);
+			setClassification(ipInfo.classification);
+			setError("");
 		} else {
 			setResult("");
+			setClassification(undefined);
 			setError("Please enter a valid IP address (IPv4 or IPv6)");
 		}
 	}, [inputValue]);
@@ -36,6 +36,7 @@ function IndexPopup() {
 		setInputValue("");
 		setResult("");
 		setError("");
+		setClassification(undefined);
 	};
 
 	const handleScan = async () => {
@@ -89,7 +90,7 @@ function IndexPopup() {
 			<div className="result-container">
 				<div className="result-label">Binary Representation:</div>
 				<div className="result-box">
-					{result && <BitDisplay bits={result} variant="popup" />}
+					{result && <BitDisplay bits={result} variant="popup" classification={classification} />}
 				</div>
 			</div>
 

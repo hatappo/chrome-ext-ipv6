@@ -1,9 +1,9 @@
 import { Storage } from "@plasmohq/storage";
 import ipRegex from "ip-regex";
 import type { PlasmoCSConfig } from "plasmo";
+import { addSpacingToBits, formatBitsToLines, getBitColorClass } from "../utils/bit-formatting";
 import type { IPInfo } from "../utils/ip-address-common";
 import { detectAddressType, detectAndConvertIP } from "../utils/ip-address-common";
-import { generateTooltipHTML } from "../utils/tooltip-generator";
 import "../style.css";
 
 export const config: PlasmoCSConfig = {
@@ -53,13 +53,71 @@ function createTooltip(ipInfo: IPInfo): HTMLElement {
 	tooltip.style.display = "none";
 
 	const label = ipInfo.type === "ipv4" ? "IPv4 Binary:" : "IPv6 Binary:";
-	tooltip.innerHTML = `
-		<div>${label}</div>
-		<div class="font-mono">${generateTooltipHTML(ipInfo.binary)}</div>
-	`;
 
-	const copyButton = createCopyButton(ipInfo.binary, ipInfo.type as "ipv4" | "ipv6");
-	tooltip.appendChild(copyButton);
+	// ヘッダー部分（ラベルとコピーボタン）
+	const header = document.createElement("div");
+	header.className = "tooltip-header";
+
+	const labelDiv = document.createElement("div");
+	labelDiv.className = "tooltip-label";
+	labelDiv.textContent = label;
+	header.appendChild(labelDiv);
+
+	// 分類情報とCopyボタンのコンテナ
+	if (ipInfo.classification) {
+		const classificationHeader = document.createElement("div");
+		classificationHeader.className = "tooltip-classification-header";
+
+		const classificationDiv = document.createElement("div");
+		classificationDiv.className = "tooltip-classification";
+		classificationDiv.innerHTML = `
+			<div class="classification-type">${ipInfo.classification.type}</div>
+			${ipInfo.classification.description ? `<div class="classification-description">${ipInfo.classification.description}</div>` : ""}
+		`;
+		classificationHeader.appendChild(classificationDiv);
+
+		const copyButton = createCopyButton(ipInfo.binary, ipInfo.type as "ipv4" | "ipv6");
+		copyButton.style.cssText = "position: static;";
+		classificationHeader.appendChild(copyButton);
+
+		tooltip.appendChild(header);
+		tooltip.appendChild(classificationHeader);
+	} else {
+		const copyButton = createCopyButton(ipInfo.binary, ipInfo.type as "ipv4" | "ipv6");
+		header.appendChild(copyButton);
+		tooltip.appendChild(header);
+	}
+
+	// ビット表示部分
+	const bitsContainer = document.createElement("div");
+	bitsContainer.className = "tooltip-bits-container";
+	const lines = formatBitsToLines(ipInfo.binary);
+
+	lines.forEach((line) => {
+		const lineDiv = document.createElement("div");
+		lineDiv.className = "tooltip-line";
+
+		const lineNumber = document.createElement("span");
+		lineNumber.className = "tooltip-line-number";
+		lineNumber.textContent = `${line.lineNumber}:`;
+
+		const bitsSpan = document.createElement("span");
+		bitsSpan.className = "tooltip-bits";
+		bitsSpan.innerHTML = addSpacingToBits(line.bits)
+			.split("")
+			.map((char) => {
+				if (char === " ") return char;
+				const colorClass = getBitColorClass(char);
+				return colorClass ? `<span class="${colorClass}">${char}</span>` : char;
+			})
+			.join("");
+
+		lineDiv.appendChild(lineNumber);
+		lineDiv.appendChild(bitsSpan);
+		bitsContainer.appendChild(lineDiv);
+	});
+
+	tooltip.appendChild(bitsContainer);
 
 	return tooltip;
 }

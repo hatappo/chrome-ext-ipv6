@@ -7,39 +7,20 @@ export interface BitDisplayLine {
 
 /**
  * IPv6ビット文字列を32ビットずつ4行に分割
- * IPv4の場合は最初の1行のみにビットが入り、残りは空文字列
+ * IPv4もIPv6射影アドレスとして同様に処理
  */
 export function formatBitsToLines(bits: string): BitDisplayLine[] {
 	const segments = bits.split(":");
+	const binaryString = segments.join("");
 
 	const lines: BitDisplayLine[] = [];
-
-	// IPv4の場合（3番目以降のセグメントが空）
-	if (segments.length > 2 && segments.slice(2).every((seg) => seg === "")) {
-		// 最初の2セグメント（32ビット）のみ結合
-		const ipv4Bits = segments.slice(0, 2).join("");
+	for (let i = 0; i < 4; i++) {
+		const start = i * 32;
+		const end = start + 32;
 		lines.push({
-			lineNumber: 32,
-			bits: ipv4Bits,
+			lineNumber: (i + 1) * 32,
+			bits: binaryString.slice(start, end),
 		});
-		// 残りの3行は空
-		for (let i = 1; i < 4; i++) {
-			lines.push({
-				lineNumber: (i + 1) * 32,
-				bits: "",
-			});
-		}
-	} else {
-		// IPv6の場合は従来通り
-		const binaryString = segments.join("");
-		for (let i = 0; i < 4; i++) {
-			const start = i * 32;
-			const end = start + 32;
-			lines.push({
-				lineNumber: (i + 1) * 32,
-				bits: binaryString.slice(start, end),
-			});
-		}
 	}
 
 	return lines;
