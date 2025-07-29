@@ -6,22 +6,19 @@ IPv4/IPv6 アドレスを 16 進数表記からビット表記に変換する Ch
 
 ## 機能
 
-- **IPv4/IPv6 対応**: IPv4 と IPv6 の両方のアドレスを自動判定して変換
-- **ホバー表示**: ウェブページ上の IP アドレスにマウスオーバーでビット表記をツールチップ表示
-- **手動変換**: ポップアップ UI で IP アドレスを手動入力して変換
-- **コンテキストメニュー変換**: 選択したテキスト内の IP アドレスを右クリックメニューから変換
-- **手動再スキャン**: 動的に追加されるコンテンツを手動でスキャン
-- **4 行表示**: 128 ビットを 32 ビットずつ 4 行に分けて表示（IPv4 は最初の 1 行のみ使用）
-- **色分け表示**: 0（青色）と 1（赤色）で視覚的に区別
-- **多様な形式対応**: IPv4 全形式、IPv6 完全形式、短縮形式（::）、ループバックアドレスなど
-- **コピー機能**: ビット表記をクリップボードにコピー
-- **設定ページ**: 自動スキャンの ON/OFF 切り替え
+- インタラクティブなホバーツールチップにより、あらゆるウェブページでバイナリ表現を表示
+- コンテキストメニュー統合により、選択したテキストを素早く分析
+- 特定のアドレスをテストするための手動入力ツール
+- カラースキーム：青ビット（0）と赤ビット（1）
+- 最新のネットワークを完全サポート：IPv6（128 ビット）および IPv4（32 ビット）
+- プライバシー重視：外部接続なしで完全にオフラインで動作
 
 ## 開発環境のセットアップ
 
 ### 必要な環境
 
-- Node.js 24.3.0 (Volta で管理)
+- Volta （Node.js と npm を管理）
+- Node.js 24.3.0
 - npm 11.4.2
 
 ### インストール
@@ -95,30 +92,30 @@ npm run package
 ```
 src/
 ├── components/
-│   └── BitDisplay.tsx          # ビット表示共通コンポーネント
+│   └── BitDisplay.tsx            # ビット表示共通コンポーネント
 ├── contents/
-│   └── plasmo.ts               # コンテンツスクリプト
+│   └── plasmo.ts                 # コンテンツスクリプト
 ├── utils/
-│   ├── ipv6-converter.ts       # IPv6変換ロジック
-│   ├── ipv6-converter.test.ts  # IPv6変換テスト
-│   ├── ipv4-converter.ts       # IPv4変換ロジック
-│   ├── ipv4-converter.test.ts  # IPv4変換テスト
-│   ├── ip-address-common.ts    # IPv4/IPv6共通インターフェース
+│   ├── ipv6-converter.ts         # IPv6変換ロジック
+│   ├── ipv6-converter.test.ts    # IPv6変換テスト
+│   ├── ipv4-converter.ts         # IPv4変換ロジック
+│   ├── ipv4-converter.test.ts    # IPv4変換テスト
+│   ├── ip-address-common.ts      # IPv4/IPv6共通インターフェース
 │   ├── ip-address-common.test.ts # 共通インターフェーステスト
-│   ├── bit-formatting.ts       # ビット表示共通ロジック
-│   ├── bit-formatting.test.ts  # ビット表示テスト
-│   └── tooltip-generator.ts    # ツールチップHTML生成
+│   ├── bit-formatting.ts         # ビット表示共通ロジック
+│   ├── bit-formatting.test.ts    # ビット表示テスト
+│   └── tooltip-generator.ts      # ツールチップHTML生成
 ├── test/
-│   └── setup.ts                # テストセットアップ
-├── options.tsx                 # 設定ページUI
-├── popup.tsx                   # ポップアップUI
-└── style.css                   # 共通スタイル
+│   └── setup.ts                  # テストセットアップ
+├── options.tsx                   # 設定ページUI
+├── popup.tsx                     # ポップアップUI
+└── style.css                     # 共通スタイル
 
-store/                          # Chrome Web Store用アセット
-├── description.txt             # ストア説明文
-├── icon.png                    # ストア用アイコン
-├── screenshot-popup.png        # ポップアップのスクリーンショット
-└── screenshot-tooltip.png      # ツールチップのスクリーンショット
+store/                            # Chrome Web Store用アセット
+├── description.txt               # ストア説明文
+├── icon.png                      # ストア用アイコン
+├── screenshot-popup.png          # ポップアップのスクリーンショット
+└── screenshot-tooltip.png        # ツールチップのスクリーンショット
 ```
 
 ## 対応する IP アドレス形式
@@ -144,7 +141,3 @@ store/                          # Chrome Web Store用アセット
 - **テスト**: Vitest
 - **コード品質**: Biome（リンター + フォーマッター）
 - **表示方式**: ホバーツールチップ + 手動再スキャン
-
-## 詳細なドキュメント
-
-- [基本実装](docs/dev/01-DOC-extension-base.md): 初期実装の詳細
