@@ -27,22 +27,23 @@ body {
 	position: fixed;
 	background: linear-gradient(to bottom right, #eff6ff, #e0e7ff);
 	color: #1f2937;
-	padding: 12px 16px;
+	padding: 16px 20px;
 	border-radius: 8px;
 	border: 1px solid #d1d5db;
 	box-shadow:
 		0 10px 15px -3px rgba(0, 0, 0, 0.1),
 		0 4px 6px -2px rgba(0, 0, 0, 0.05);
 	z-index: 10000;
-	max-width: 650px;
+	min-width: 500px;
+	max-width: 750px;
 	font-size: 14px;
 	line-height: 1.5;
 	/* カーソル移動しやすくするための非表示の上部パディング */
 	margin-top: -2px;
-	padding-top: 14px;
+	padding-top: 18px;
 }
 
-.ipv6-tooltip > div:first-child {
+.tooltip-label {
 	font-weight: bold;
 	margin-bottom: 4px;
 }
@@ -52,10 +53,34 @@ body {
 	font-size: 12px;
 }
 
+/* ツールチップヘッダー */
+.tooltip-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+/* ツールチップ分類ヘッダー */
+.tooltip-classification-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+/* ツールチップビットコンテナ */
+.tooltip-bits-container {
+	background-color: white;
+	border-radius: 6px;
+	padding: 12px 16px;
+	border: 1px solid #e5e7eb;
+}
+
 /* ツールチップ内の2行表示スタイル */
 .tooltip-line {
 	display: flex;
-	margin-bottom: 4px;
+	margin-bottom: 6px;
 	font-family: monospace;
 	font-size: 11px;
 	align-items: center;
@@ -67,21 +92,17 @@ body {
 
 .tooltip-line-number {
 	color: #6b7280;
-	margin-right: 8px;
+	margin-right: 12px;
 	width: 36px;
 	text-align: right;
 	flex-shrink: 0;
 }
 
 .tooltip-bits {
-	flex: 1;
-	word-break: break-all;
-	background-color: white;
-	padding: 4px 8px;
-	border-radius: 4px;
-	border: 1px solid #e5e7eb;
 	font-family: monospace;
+	font-size: 11px;
 	letter-spacing: 0.5px;
+	text-align: left;
 }
 
 /* ポップアップスタイル */
@@ -303,6 +324,63 @@ body {
 	margin-top: 16px;
 	font-size: 12px;
 	color: #6b7280;
+}
+
+/* 分類情報の表示スタイル */
+.classification-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.classification-info {
+	padding: 6px 12px;
+	background-color: #f3f4f6;
+	border-radius: 6px;
+	font-size: 13px;
+	color: #374151;
+	flex: 1;
+	margin-right: 8px;
+}
+
+.classification-info-empty {
+	flex: 1;
+}
+
+.classification-type {
+	font-weight: 600;
+	color: #1f2937;
+}
+
+.classification-description {
+	color: #6b7280;
+	font-size: 12px;
+	margin-top: 2px;
+}
+
+/* ツールチップ内の分類表示 */
+.tooltip-classification {
+	padding: 8px 12px;
+	background-color: rgba(243, 244, 246, 0.9);
+	border-radius: 6px;
+	font-size: 13px;
+	text-align: left;
+	flex: 1;
+	margin-right: 8px;
+}
+
+.tooltip-classification .classification-type {
+	display: block;
+	font-weight: 600;
+	color: #1f2937;
+}
+
+.tooltip-classification .classification-description {
+	display: block;
+	color: #6b7280;
+	font-size: 12px;
+	margin-top: 2px;
 }
 
 /* Copyボタンのスタイル */
